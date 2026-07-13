@@ -312,6 +312,12 @@ window.SHOPEE_DATA = {"generatedAt":"2026-07-06","products":[{"id":"57307013478"
       <div id="calcResult"></div>
       <button class="copyBtn" id="copyCalc">複製明細</button>
     </div>
+
+    <div class="calcCard">
+      <h2>客服說詞(傳給客人)</h2>
+      <div id="speechText" style="font-size:14.5px; line-height:1.9; background:#fafaf8; border:1px solid var(--line); border-radius:10px; padding:12px 14px; white-space:pre-wrap;"></div>
+      <button class="copyBtn" id="copySpeech" style="margin-top:12px;">複製說詞</button>
+    </div>
   </div><!-- /tabCalc -->
 </div>
 <div id="chartModal">
@@ -862,6 +868,23 @@ window.SHOPEE_DATA = {"generatedAt":"2026-07-06","products":[{"id":"57307013478"
       r1:num('rFee1'), r2:num('rFee2'), r2fix:r2fix, r3:num('rFee3')};
   }
 
+  function speechText(){
+    var c = calc();
+    var lines = [];
+    var first = '您好,大量優惠 '+c.qty+' 件方案將提供您 '+fmt(c.voucher)+' 元優惠券';
+    if(c.freeShip) first += ',其中已包含賣家宅配免運折扣 '+fmt(c.shipFee)+' 元';
+    first += '。';
+    lines.push(first);
+    if(c.promo > 0){
+      lines.push('另外,商品加入購物車即可享有 '+c.qty+' 件多件優惠,約可再折抵 '+fmt(c.promo)+' 元。');
+    }
+    lines.push('合計總優惠約為 '+fmt(c.voucher + c.promo)+' 元。');
+    if(c.freeShip){
+      lines.push('為確保優惠可正常折抵,下單時請務必選擇「賣家宅配」物流方式,謝謝您!');
+    }
+    return lines.join('\n');
+  }
+
   function renderCalc(){
     autoCoupon();
     autoPromo();
@@ -887,6 +910,7 @@ window.SHOPEE_DATA = {"generatedAt":"2026-07-06","products":[{"id":"57307013478"
       (c.manual ? ' + 手動折扣 '+fmt(c.manual) : '')+
       ' = <span style="color:var(--blue)">$'+fmt(c.voucher)+'</span></div>';
     $('calcResult').innerHTML = h;
+    $('speechText').textContent = speechText();
   }
 
   function calcText(){
@@ -935,6 +959,12 @@ window.SHOPEE_DATA = {"generatedAt":"2026-07-06","products":[{"id":"57307013478"
     var t = this;
     t.classList.add('copied'); t.textContent='已複製 ✓';
     setTimeout(function(){ t.classList.remove('copied'); t.textContent='複製明細'; }, 1500);
+  });
+  $('copySpeech').addEventListener('click', function(){
+    copyText(speechText(), '已複製說詞');
+    var t = this;
+    t.classList.add('copied'); t.textContent='已複製 ✓';
+    setTimeout(function(){ t.classList.remove('copied'); t.textContent='複製說詞'; }, 1500);
   });
   renderCalc();
 
