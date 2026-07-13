@@ -26,6 +26,60 @@ window.SHOPEE_DATA = {"generatedAt":"2026-07-06","products":[{"id":"57307013478"
   header h1 .dot{color:var(--accent);}
   #dataDate{font-size:12.5px; color:var(--sub);}
 
+  /* 分頁 */
+  #tabBar{display:flex; gap:8px; margin-bottom:12px;}
+  .tabBtn{
+    border:1.5px solid var(--line); background:var(--card); color:var(--sub);
+    border-radius:10px; padding:8px 18px; font-size:14.5px; font-weight:600; cursor:pointer;
+  }
+  .tabBtn.active{border-color:var(--accent); background:var(--accent-soft); color:var(--accent);}
+
+  /* 試算器 */
+  #tabCalc{display:none;}
+  .calcCard{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:12px;}
+  .calcCard h2{font-size:14px; font-weight:700; color:var(--sub); margin-bottom:10px;}
+  .calcGrid{display:grid; grid-template-columns:repeat(2,1fr); gap:10px;}
+  .calcField label{display:block; font-size:12px; color:var(--sub); font-weight:600; margin-bottom:3px;}
+  .calcField input[type=text], .calcField input[type=number]{
+    width:100%; padding:9px 10px; font-size:15px; border:1.5px solid var(--line);
+    border-radius:10px; outline:none; background:#fff;
+  }
+  .calcField input:focus{border-color:var(--accent);}
+  .feeRow{display:flex; align-items:center; gap:6px; font-size:13.5px; margin-top:6px; flex-wrap:wrap;}
+  .feeRow input{width:64px; padding:5px 6px; font-size:14px; border:1.5px solid var(--line); border-radius:8px; text-align:right;}
+  .shipRow{display:flex; align-items:center; gap:8px; font-size:14px; margin-top:4px;}
+  .shipRow input[type=checkbox]{accent-color:var(--accent); width:17px; height:17px;}
+  .shipRow input[type=number]{width:80px; padding:5px 8px; border:1.5px solid var(--line); border-radius:8px; font-size:14px;}
+  #calcResult{font-size:14.5px; line-height:1.8;}
+  #calcResult .sec{font-weight:700; margin-top:10px;}
+  #calcResult .sec:first-child{margin-top:0;}
+  #calcResult .profit{
+    margin-top:12px; padding:10px 12px; background:var(--accent-soft);
+    border-radius:10px; font-size:16px; font-weight:700;
+  }
+  #calcResult .profit small{display:block; font-size:13.5px; font-weight:600; color:var(--sub); margin-top:2px;}
+  #copyCalc{margin-top:12px;}
+  .couponRow{
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    margin-top:10px; font-size:13.5px;
+  }
+  .couponRow label{display:flex; align-items:center; gap:5px; cursor:pointer; font-weight:600;}
+  .couponRow input[type=checkbox]{accent-color:var(--accent); width:16px; height:16px;}
+  #couponHint{color:var(--blue); font-weight:600;}
+  #tierBtn{
+    border:1px solid var(--line); background:#fff; border-radius:8px;
+    padding:4px 10px; font-size:13px; cursor:pointer; color:var(--sub);
+  }
+  #tierTable{
+    display:none; margin-top:8px; padding:10px 12px; background:#fafaf8;
+    border:1px solid var(--line); border-radius:10px;
+    column-count:3; column-gap:18px; font-size:13px; line-height:1.9;
+  }
+  @media(max-width:560px){ #tierTable{column-count:2;} }
+  #tierTable .tRow{break-inside:avoid; white-space:nowrap;}
+  #tierTable .tRow b{color:var(--accent);}
+  input:disabled{background:#f1f0ec !important; color:var(--sub);}
+
   /* 篩選面板 */
   #panel{
     display:none; background:var(--card); border:1px solid var(--line);
@@ -159,6 +213,12 @@ window.SHOPEE_DATA = {"generatedAt":"2026-07-06","products":[{"id":"57307013478"
     <span id="dataDate"></span>
   </header>
 
+  <div id="tabBar">
+    <button class="tabBtn active" data-tab="tabSearch">顏色查詢</button>
+    <button class="tabBtn" data-tab="tabCalc">大量優惠試算</button>
+  </div>
+
+  <div id="tabSearch">
   <div id="noData">
     <div class="big">尚未載入商品資料</div>
     <div class="hint">請拖曳或點擊上傳蝦皮批次匯出的商品 Excel</div>
@@ -180,7 +240,7 @@ window.SHOPEE_DATA = {"generatedAt":"2026-07-06","products":[{"id":"57307013478"
       </div>
     </div>
     <div class="subRow">
-      <input id="q" type="search" placeholder="關鍵字(選填):商品名稱或顏色" autocomplete="off">
+      <input id="q" type="search" placeholder="關鍵字:名稱、顏色,或 型號-顏色(例:CP101-白色)" autocomplete="off">
       <button id="resetBtn">全部重設</button>
       <span id="resultCount"></span>
     </div>
@@ -202,6 +262,57 @@ window.SHOPEE_DATA = {"generatedAt":"2026-07-06","products":[{"id":"57307013478"
       <div id="updResult"></div>
     </div>
   </details>
+  </div><!-- /tabSearch -->
+
+  <div id="tabCalc">
+    <div class="calcCard">
+      <h2>訂單資料</h2>
+      <div class="calcGrid">
+        <div class="calcField"><label>客戶名稱</label><input type="text" id="cName" placeholder="例:as411016"></div>
+        <div class="calcField"><label>商品/備註</label><input type="text" id="cItem" placeholder="例:T-24 一般尺碼"></div>
+        <div class="calcField"><label>件數</label><input type="number" id="cQty" value="50" min="1"></div>
+        <div class="calcField"><label>優惠單價 $/件</label><input type="number" id="cPrice" value="149" min="0"></div>
+        <div class="calcField"><label>賣場優惠券 $</label><input type="number" id="cCoupon" value="0" min="0"></div>
+        <div class="calcField"><label>促銷組合折抵 $</label><input type="number" id="cPromo" value="0" min="0"></div>
+        <div class="calcField"><label>成本單價 $/件(零售價)</label><input type="number" id="cCost" value="0" min="0"></div>
+        <div class="calcField"><label>手動折扣金額 $(額外優惠)</label><input type="number" id="cManual" value="0" min="0"></div>
+      </div>
+      <div class="shipRow">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+          <input type="checkbox" id="cFreeShip">給免運,運費
+        </label>
+        <input type="number" id="cShipFee" value="120" min="0"> 元
+      </div>
+      <div class="couponRow">
+        <label><input type="checkbox" id="cCouponAuto" checked>優惠券自動偵測</label>
+        <span id="couponHint"></span>
+        <button id="tierBtn">對照表 ▾</button>
+      </div>
+      <div id="tierTable"></div>
+      <div class="couponRow">
+        <span style="font-weight:600;">促銷組合:</span>
+        <select id="cPromoPlan" style="padding:5px 8px; font-size:13.5px; border:1.5px solid var(--line); border-radius:8px; background:#fff;">
+          <option value="summer" selected>夏季組合包(3件9.9折/4件9.7折/5件9.6折)</option>
+          <option value="winter">冬季組合包(2件9.9折/3件9.7折/4件9.6折)</option>
+          <option value="manual">不套用/手動輸入</option>
+        </select>
+        <span id="promoHint"></span>
+      </div>
+    </div>
+
+    <div class="calcCard">
+      <h2>蝦皮抽成費率(可調整)</h2>
+      <div class="feeRow">成交手續費 <input type="number" id="rFee1" value="6" step="0.1" min="0">%</div>
+      <div class="feeRow">活動與物流隱碼服務費 <input type="number" id="rFee2" value="6" step="0.1" min="0">% + 固定 <input type="number" id="rFee2fix" value="10" min="0"> 元</div>
+      <div class="feeRow">金流與系統處理費 <input type="number" id="rFee3" value="2.5" step="0.1" min="0">%</div>
+    </div>
+
+    <div class="calcCard">
+      <h2>試算結果</h2>
+      <div id="calcResult"></div>
+      <button class="copyBtn" id="copyCalc">複製明細</button>
+    </div>
+  </div><!-- /tabCalc -->
 </div>
 <div id="chartModal">
   <div class="chartBox">
@@ -380,19 +491,57 @@ window.SHOPEE_DATA = {"generatedAt":"2026-07-06","products":[{"id":"57307013478"
     return out;
   }
 
+  /* 解析關鍵字:支援「型號-顏色」組合(例:CP101-白色)。
+     型號本身可含 - (如 AG-L210),所以逐一嘗試切點,找出兩邊都對得到的組合。
+     若整串本來就能對到型號/名稱/顏色,維持一般搜尋,避免誤判(如搜 T-24)。 */
+  var QPLAN = {type:'none'};
+  function computePlan(){
+    var q = sanitize($('q').value).replace(/[－–—﹣]/g,'-');
+    if(!q){ QPLAN = {type:'none'}; return; }
+    var lower = q.toLowerCase();
+    // 整串直接對得到 → 一般搜尋
+    var plainHit = DATA.products.some(function(p){
+      if(p.name.toLowerCase().indexOf(lower)!==-1) return true;
+      if(p.sku && p.sku.toLowerCase().indexOf(lower)!==-1) return true;
+      if(p.id.indexOf(q)!==-1) return true;
+      return Object.keys(p.colors).some(function(c){ return c.indexOf(q)!==-1; });
+    });
+    if(!plainHit && q.indexOf('-')!==-1){
+      // 嘗試每個 - 當切點:左=型號、右=顏色
+      var idx = -1;
+      while((idx = q.indexOf('-', idx+1)) !== -1){
+        var skuQ = q.slice(0, idx).trim(), colorQ = q.slice(idx+1).trim();
+        if(!skuQ || !colorQ) continue;
+        var sl = skuQ.toLowerCase();
+        var ok = DATA.products.some(function(p){
+          if(!p.sku || p.sku.toLowerCase().indexOf(sl)===-1) return false;
+          return Object.keys(p.colors).some(function(c){ return c.indexOf(colorQ)!==-1; });
+        });
+        if(ok){ QPLAN = {type:'combo', skuQ:sl, colorQ:colorQ, raw:q}; return; }
+      }
+    }
+    QPLAN = {type:'plain', q:q, lower:lower};
+  }
+
   /* 依目前 sku+關鍵字 篩出的商品(還沒套顏色/尺寸) */
   function baseProducts(){
     var sku = $('skuSel').value;
-    var q = sanitize($('q').value);
     return DATA.products.filter(function(p){
       if(sku && sku !== '' ){
         if(sku === NO_SKU){ if(p.sku) return false; }
         else if(p.sku !== sku) return false;
       }
-      if(q){
-        var hitName = p.name.indexOf(q) !== -1 || p.name.toLowerCase().indexOf(q.toLowerCase()) !== -1;
+      if(QPLAN.type === 'plain'){
+        var q = QPLAN.q, lower = QPLAN.lower;
+        var hitName = p.name.toLowerCase().indexOf(lower) !== -1 ||
+                      (p.sku && p.sku.toLowerCase().indexOf(lower) !== -1) ||
+                      p.id.indexOf(q) !== -1;
         var hitColor = Object.keys(p.colors).some(function(c){ return c.indexOf(q)!==-1; });
         if(!hitName && !hitColor) return false;
+      }else if(QPLAN.type === 'combo'){
+        if(!p.sku || p.sku.toLowerCase().indexOf(QPLAN.skuQ)===-1) return false;
+        var hasColor = Object.keys(p.colors).some(function(c){ return c.indexOf(QPLAN.colorQ)!==-1; });
+        if(!hasColor) return false;
       }
       return true;
     });
@@ -467,10 +616,15 @@ window.SHOPEE_DATA = {"generatedAt":"2026-07-06","products":[{"id":"57307013478"
     return parts.join('、') + priceTxt;
   }
 
+  function colorHitByQuery(c){
+    if(QPLAN.type === 'plain') return c.indexOf(QPLAN.q) !== -1;
+    if(QPLAN.type === 'combo') return c.indexOf(QPLAN.colorQ) !== -1;
+    return false;
+  }
+
   function cardHtml(p){
     var colorPick = $('colorSel').value;
     var sizePick = $('sizeSel').value;
-    var q = sanitize($('q').value);
 
     var names = Object.keys(p.colors).filter(function(c){
       if(colorPick && c !== colorPick) return false;
@@ -478,7 +632,7 @@ window.SHOPEE_DATA = {"generatedAt":"2026-07-06","products":[{"id":"57307013478"
     });
     // 排序:關鍵字命中在前,其餘照名稱
     names.sort(function(a,b){
-      var ha = (q && a.indexOf(q)!==-1)?1:0, hb = (q && b.indexOf(q)!==-1)?1:0;
+      var ha = colorHitByQuery(a)?1:0, hb = colorHitByQuery(b)?1:0;
       if(ha!==hb) return hb-ha;
       return a.localeCompare(b,'zh-Hant');
     });
@@ -487,7 +641,7 @@ window.SHOPEE_DATA = {"generatedAt":"2026-07-06","products":[{"id":"57307013478"
     var LIMIT = 6;
     var showList = (colorPick || expanded) ? names : names.slice(0, LIMIT);
     var rows = showList.map(function(c){
-      var hit = (colorPick && c===colorPick) || (q && c.indexOf(q)!==-1) ? ' hit' : '';
+      var hit = (colorPick && c===colorPick) || colorHitByQuery(c) ? ' hit' : '';
       return '<div class="colorRow'+hit+'">'+
         '<span class="sw" style="background:'+swatchOf(c)+'"></span>'+
         '<span class="cname">'+esc(c)+'</span>'+
@@ -517,6 +671,7 @@ window.SHOPEE_DATA = {"generatedAt":"2026-07-06","products":[{"id":"57307013478"
   }
 
   function render(){
+    computePlan();
     var colorPick = $('colorSel').value;
     var sizePick = $('sizeSel').value;
 
@@ -539,6 +694,7 @@ window.SHOPEE_DATA = {"generatedAt":"2026-07-06","products":[{"id":"57307013478"
   }
 
   function refreshAll(){
+    computePlan();
     refreshColorOptions();
     refreshSizeOptions();
     render();
@@ -606,6 +762,181 @@ window.SHOPEE_DATA = {"generatedAt":"2026-07-06","products":[{"id":"57307013478"
   $('chartModal').addEventListener('click', function(e){
     if(e.target === this) this.classList.remove('show');
   });
+
+  /* ---------- 分頁切換 ---------- */
+  $('tabBar').addEventListener('click', function(e){
+    var btn = e.target.closest('.tabBtn'); if(!btn) return;
+    var tab = btn.getAttribute('data-tab');
+    document.querySelectorAll('.tabBtn').forEach(function(b){ b.classList.toggle('active', b===btn); });
+    $('tabSearch').style.display = (tab==='tabSearch') ? 'block' : 'none';
+    $('tabCalc').style.display = (tab==='tabCalc') ? 'block' : 'none';
+  });
+
+  /* ---------- 大量優惠試算 ---------- */
+  /* 賣場優惠券級距:[滿額門檻, 折抵] 由高到低 */
+  var COUPON_TIERS = [
+    [15999,480],[14999,450],[13999,420],[12999,390],
+    [9999,300],[8999,270],[7999,240],[6999,210],[5999,200],
+    [5699,170],[5499,165],[5299,160],[4999,150],[4699,140],[4499,135],[4299,130],
+    [3999,120],[3699,110],[3499,105],[3299,100],[2999,90],[2699,80],[2499,75],[2299,70],
+    [1999,60],[1699,50],[1499,45],[1299,40],[999,30],[799,25],[599,20]
+  ];
+  function num(id){ var v = parseFloat($(id).value); return isNaN(v) ? 0 : v; }
+  function fmt(n){ return Math.round(n).toLocaleString('en-US'); }
+  function fmt1(n){ return (Math.round(n*10)/10).toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:1}); }
+
+  /* 促銷組合方案:[最低件數, 折數×100] 由高到低 */
+  var PROMO_PLANS = {
+    summer: {name:'夏季組合包', tiers:[[5,96],[4,97],[3,99]]},
+    winter: {name:'冬季組合包', tiers:[[4,96],[3,97],[2,99]]}
+  };
+  function autoPromo(){
+    var plan = $('cPromoPlan').value;
+    if(plan === 'manual'){
+      $('cPromo').disabled = false;
+      $('promoHint').textContent = '(手動輸入)';
+      return;
+    }
+    $('cPromo').disabled = true;
+    var qty = num('cQty'), price = num('cPrice');
+    var tiers = PROMO_PLANS[plan].tiers, hit = null;
+    for(var i=0;i<tiers.length;i++){
+      if(qty >= tiers[i][0]){ hit = tiers[i]; break; }
+    }
+    if(!hit){
+      $('cPromo').value = 0;
+      $('promoHint').textContent = '未達件數門檻(買'+tiers[tiers.length-1][0]+'件起)';
+      return;
+    }
+    var rate = hit[1]/100;
+    var unitDisc = Math.round(price * rate);      // 蝦皮以打折後單價取整計算
+    var promo = (price - unitDisc) * qty;
+    $('cPromo').value = promo;
+    $('promoHint').textContent = (hit[1]/10).toFixed(1)+'折,單價 $'+fmt(price)+' → $'+fmt(unitDisc);
+  }
+
+  function autoCoupon(){
+    var auto = $('cCouponAuto').checked;
+    $('cCoupon').disabled = auto;
+    if(!auto){ $('couponHint').textContent = '(手動輸入)'; return; }
+    var subtotal = num('cQty') * num('cPrice');
+    var tier = null;
+    for(var i=0;i<COUPON_TIERS.length;i++){
+      if(subtotal >= COUPON_TIERS[i][0]){ tier = COUPON_TIERS[i]; break; }
+    }
+    if(tier){
+      $('cCoupon').value = tier[1];
+      $('couponHint').textContent = '符合:滿$'+fmt(tier[0])+' 折'+tier[1];
+    }else{
+      $('cCoupon').value = 0;
+      $('couponHint').textContent = '未達最低門檻 $599';
+    }
+  }
+
+  function calc(){
+    var qty = num('cQty'), price = num('cPrice');
+    var coupon = num('cCoupon'), promo = num('cPromo');
+    var costU = num('cCost');
+    var r1 = num('rFee1')/100, r2 = num('rFee2')/100, r2fix = num('rFee2fix'), r3 = num('rFee3')/100;
+    var freeShip = $('cFreeShip').checked, shipFee = num('cShipFee');
+
+    var subtotal = qty * price;
+    var afterCoupon = subtotal - coupon;
+    var net = afterCoupon - promo;
+    var fee1 = net * r1;
+    var fee2 = net * r2 + r2fix;
+    var fee3 = net * r3;
+    var f1 = Math.round(fee1), f2 = Math.round(fee2), f3 = Math.round(fee3);
+    var cost = qty * costU;
+    var profit = net - f1 - f2 - f3 - cost;
+    var profitShip = profit - shipFee;
+    var manual = num('cManual');
+    var voucher = coupon + (freeShip ? shipFee : 0) + manual;
+    var profitFinal = (freeShip ? profitShip : profit) - manual;
+
+    return {qty:qty, price:price, coupon:coupon, promo:promo, subtotal:subtotal,
+      afterCoupon:afterCoupon, net:net, fee1:fee1, fee2:fee2, fee3:fee3,
+      f1:f1, f2:f2, f3:f3, costU:costU, cost:cost, profit:profit,
+      freeShip:freeShip, shipFee:shipFee, profitShip:profitShip,
+      manual:manual, voucher:voucher, profitFinal:profitFinal,
+      r1:num('rFee1'), r2:num('rFee2'), r2fix:r2fix, r3:num('rFee3')};
+  }
+
+  function renderCalc(){
+    autoCoupon();
+    autoPromo();
+    var c = calc();
+    var h = '';
+    h += '<div class="sec">🧾 訂單</div>';
+    h += '<div class="line">'+c.qty+' × $'+fmt(c.price)+' = $'+fmt(c.subtotal)+'</div>';
+    if(c.coupon) h += '<div class="line">− 賣場優惠券 $'+fmt(c.coupon)+' = $'+fmt(c.afterCoupon)+'</div>';
+    if(c.promo) h += '<div class="line">− 促銷組合 $'+fmt(c.promo)+' = $'+fmt(c.net)+'</div>';
+    h += '<div class="line"><b>實收 $'+fmt(c.net)+'</b></div>';
+    h += '<div class="sec">💸 蝦皮抽成(共 $'+fmt(c.f1+c.f2+c.f3)+')</div>';
+    h += '<div class="line">成交手續費 '+c.r1+'% = $'+fmt1(c.fee1)+'</div>';
+    h += '<div class="line">活動與物流隱碼服務費 '+c.r2+'% +'+c.r2fix+' = $'+fmt1(c.fee2)+'</div>';
+    h += '<div class="line">金流與系統處理費 '+c.r3+'% = $'+fmt1(c.fee3)+'</div>';
+    h += '<div class="sec">📦 成本(零售價計算)</div>';
+    h += '<div class="line">$'+fmt(c.costU)+' × '+c.qty+' = $'+fmt(c.cost)+'</div>';
+    h += '<div class="profit">✅ 利潤:$'+fmt(c.net)+' − '+fmt(c.f1)+' − '+fmt(c.f2)+' − '+fmt(c.f3)+' − '+fmt(c.cost)+' = <span style="color:var(--accent)">$'+fmt(c.profit)+'</span>';
+    if(c.freeShip) h += '<small>🚚 若給免運:$'+fmt(c.profit)+' − 運費 $'+fmt(c.shipFee)+' = $'+fmt(c.profitShip)+'</small>';
+    if(c.manual) h += '<small>➖ 手動折扣:$'+fmt(c.freeShip?c.profitShip:c.profit)+' − $'+fmt(c.manual)+' = $'+fmt(c.profitFinal)+'</small>';
+    h += '</div>';
+    h += '<div class="profit" style="background:var(--blue-soft);">🎟 優惠券金額:賣場優惠券 '+fmt(c.coupon)+
+      (c.freeShip ? ' + 免運 '+fmt(c.shipFee) : '')+
+      (c.manual ? ' + 手動折扣 '+fmt(c.manual) : '')+
+      ' = <span style="color:var(--blue)">$'+fmt(c.voucher)+'</span></div>';
+    $('calcResult').innerHTML = h;
+  }
+
+  function calcText(){
+    var c = calc();
+    var name = sanitize($('cName').value), item = sanitize($('cItem').value);
+    var L = [];
+    L.push('大量優惠試算:'+c.qty+'件 '+(item||''));
+    if(name) L.push('客戶名稱:'+name);
+    L.push('🧾 訂單:');
+    L.push(c.qty+' × $'+fmt(c.price)+' = $'+fmt(c.subtotal));
+    if(c.coupon) L.push('− 賣場優惠券 $'+fmt(c.coupon)+' = $'+fmt(c.afterCoupon));
+    if(c.promo) L.push('− 促銷組合 $'+fmt(c.promo)+' = $'+fmt(c.net));
+    L.push('💸 蝦皮抽成:');
+    L.push('成交手續費 '+c.r1+'% = $'+fmt1(c.fee1));
+    L.push('活動與物流隱碼服務費 '+c.r2+'% +'+c.r2fix+' = $'+fmt1(c.fee2));
+    L.push('金流與系統處理費 '+c.r3+'% = $'+fmt1(c.fee3));
+    L.push('📦 成本(零售價 $'+fmt(c.costU)+' × '+c.qty+')= $'+fmt(c.cost));
+    L.push('✅ 利潤:'+fmt(c.net)+' − '+fmt(c.f1)+' − '+fmt(c.f2)+' − '+fmt(c.f3)+' − '+fmt(c.cost)+' = $'+fmt(c.profit));
+    if(c.freeShip) L.push('🚚 若給免運:'+fmt(c.profit)+' − '+fmt(c.shipFee)+' = $'+fmt(c.profitShip));
+    if(c.manual) L.push('➖ 手動折扣:'+fmt(c.freeShip?c.profitShip:c.profit)+' − '+fmt(c.manual)+' = $'+fmt(c.profitFinal));
+    L.push('🎟 優惠券金額:'+fmt(c.coupon)+
+      (c.freeShip ? ' + 免運'+fmt(c.shipFee) : '')+
+      (c.manual ? ' + 手動折扣'+fmt(c.manual) : '')+
+      ' = $'+fmt(c.voucher));
+    return L.join('\n');
+  }
+
+  ['cQty','cPrice','cCoupon','cPromo','cCost','cManual','cShipFee','rFee1','rFee2','rFee2fix','rFee3'].forEach(function(id){
+    $(id).addEventListener('input', renderCalc);
+  });
+  $('cFreeShip').addEventListener('change', renderCalc);
+  $('cCouponAuto').addEventListener('change', renderCalc);
+  $('cPromoPlan').addEventListener('change', renderCalc);
+  // 對照表(由低到高列出)
+  $('tierTable').innerHTML = COUPON_TIERS.slice().reverse().map(function(t){
+    return '<div class="tRow">滿$'+fmt(t[0])+' 折<b>'+t[1]+'</b></div>';
+  }).join('');
+  $('tierBtn').addEventListener('click', function(){
+    var tt = $('tierTable');
+    var open = tt.style.display === 'block';
+    tt.style.display = open ? 'none' : 'block';
+    this.textContent = open ? '對照表 ▾' : '對照表 ▴';
+  });
+  $('copyCalc').addEventListener('click', function(){
+    copyText(calcText(), '已複製試算明細');
+    var t = this;
+    t.classList.add('copied'); t.textContent='已複製 ✓';
+    setTimeout(function(){ t.classList.remove('copied'); t.textContent='複製明細'; }, 1500);
+  });
+  renderCalc();
 
   /* ---------- 更新資料 ---------- */
   function buildSelfHtml(dataObj){
