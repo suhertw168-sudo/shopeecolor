@@ -165,6 +165,42 @@ window.SHOPEE_DATA = {"generatedAt":"2026-07-06","products":[{"id":"57307013478"
   .chartSub:first-child{border-top:none;}
   #empty{display:none; text-align:center; color:var(--sub); padding:40px 0; font-size:14px;}
 
+  /* 編輯模式 */
+  .rowBtns{display:flex; gap:4px; flex:none;}
+  .rowBtns button{
+    border:1px solid var(--line); background:#fff; border-radius:6px;
+    padding:1px 7px; font-size:12px; cursor:pointer; color:var(--sub);
+  }
+  .rowBtns button.del{color:#c0392b; border-color:#e8c4bf;}
+  .editForm{
+    margin-top:8px; padding:10px; background:var(--blue-soft);
+    border-radius:10px; display:flex; flex-direction:column; gap:8px; font-size:13.5px;
+  }
+  .editForm .efRow{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+  .editForm label{font-weight:600; flex:none; width:44px;}
+  .editForm input{
+    flex:1; min-width:120px; padding:7px 9px; font-size:14px;
+    border:1.5px solid var(--line); border-radius:8px; outline:none;
+  }
+  .editForm .hintTxt{font-size:12px; color:var(--sub);}
+  .editForm .efBtns{display:flex; gap:8px;}
+  .editForm .efBtns button{
+    border:none; border-radius:8px; padding:7px 16px; font-size:13.5px; font-weight:600; cursor:pointer;
+  }
+  #efSave{background:var(--accent); color:#fff;}
+  #efCancel{background:#fff; border:1px solid var(--line) !important; color:var(--sub);}
+  #editNotice{
+    display:none; position:fixed; left:50%; transform:translateX(-50%);
+    bottom:16px; z-index:80; background:var(--ink); color:#fff;
+    border-radius:12px; padding:10px 16px; font-size:14px;
+    box-shadow:0 4px 16px rgba(0,0,0,.25);
+    display:none; align-items:center; gap:12px; max-width:92vw;
+  }
+  #editNotice button{
+    border:none; background:var(--accent); color:#fff; border-radius:8px;
+    padding:7px 14px; font-size:13.5px; font-weight:700; cursor:pointer; white-space:nowrap;
+  }
+
   /* 無資料/更新資料區 */
   #noData{
     display:none; border:2px dashed var(--line); border-radius:14px; background:var(--card);
@@ -241,6 +277,7 @@ window.SHOPEE_DATA = {"generatedAt":"2026-07-06","products":[{"id":"57307013478"
     </div>
     <div class="subRow">
       <input id="q" type="search" placeholder="關鍵字:名稱、顏色,或 型號-顏色(例:CP101-白色)" autocomplete="off">
+      <label><input type="checkbox" id="editMode">✏️ 編輯</label>
       <button id="resetBtn">全部重設</button>
       <span id="resultCount"></span>
     </div>
@@ -319,6 +356,10 @@ window.SHOPEE_DATA = {"generatedAt":"2026-07-06","products":[{"id":"57307013478"
       <button class="copyBtn" id="copySpeech" style="margin-top:12px;">複製說詞</button>
     </div>
   </div><!-- /tabCalc -->
+</div>
+<div id="editNotice">
+  <span>✏️ 已修改尚未儲存,下載新檔並取代舊檔才會保留</span>
+  <button id="editSaveBtn">下載新的網頁檔</button>
 </div>
 <div id="chartModal">
   <div class="chartBox">
@@ -628,6 +669,27 @@ window.SHOPEE_DATA = {"generatedAt":"2026-07-06","products":[{"id":"57307013478"
     return false;
   }
 
+  var EDIT = false;
+  var editorState = null;   // {pid, color(null=新增), prefPrice}
+
+  function editFormHtml(p){
+    var name='', sizes='', price='';
+    if(editorState.color){
+      name = editorState.color;
+      var arr = p.colors[editorState.color] || [];
+      sizes = arr.map(function(v){ return v[0]; }).filter(Boolean).join(',');
+      price = arr.length ? arr[0][1] : '';
+    }
+    editorState.prefPrice = String(price);
+    return '<div class="editForm">'+
+      '<div class="efRow"><label>顏色</label><input id="efName" value="'+esc(name)+'" placeholder="例:藏青08"></div>'+
+      '<div class="efRow"><label>尺寸</label><input id="efSizes" value="'+esc(sizes)+'" placeholder="用逗號分隔,例:S,M,L,XL,2XL"></div>'+
+      '<div class="efRow"><label>價格</label><input id="efPrice" type="number" value="'+esc(price)+'" placeholder="$/件"></div>'+
+      '<div class="hintTxt">新尺寸會用此價格;若有改動價格欄,所有尺寸都會改為此價格</div>'+
+      '<div class="efBtns"><button id="efSave">儲存</button><button id="efCancel">取消</button></div>'+
+    '</div>';
+  }
+
   function cardHtml(p){
     var colorPick = $('colorSel').value;
     var sizePick = $('sizeSel').value;
@@ -648,10 +710,16 @@ window.SHOPEE_DATA = {"generatedAt":"2026-07-06","products":[{"id":"57307013478"
     var showList = (colorPick || expanded) ? names : names.slice(0, LIMIT);
     var rows = showList.map(function(c){
       var hit = (colorPick && c===colorPick) || colorHitByQuery(c) ? ' hit' : '';
+      var editBtns = EDIT
+        ? '<span class="rowBtns">'+
+            '<button data-editcolor="'+p.id+'|'+esc(c)+'">✎ 修改</button>'+
+            '<button class="del" data-delcolor="'+p.id+'|'+esc(c)+'">✕</button>'+
+          '</span>'
+        : '';
       return '<div class="colorRow'+hit+'">'+
         '<span class="sw" style="background:'+swatchOf(c)+'"></span>'+
         '<span class="cname">'+esc(c)+'</span>'+
-        '<span class="sizes">'+sizesHtml(p.colors[c], sizePick)+'</span></div>';
+        '<span class="sizes">'+sizesHtml(p.colors[c], sizePick)+'</span>'+editBtns+'</div>';
     }).join('');
 
     var hiddenN = names.length - showList.length;
@@ -663,6 +731,9 @@ window.SHOPEE_DATA = {"generatedAt":"2026-07-06","products":[{"id":"57307013478"
       ? '<button class="chartBtn" data-chart="'+esc(p.sku)+'">尺寸表</button>' : '';
     var noMatch = names.length===0 ? '<div class="noStockNote">此商品沒有符合目前條件的顏色/尺寸</div>' : '';
 
+    var addBtn = EDIT ? '<button class="moreBtn" data-addcolor="'+p.id+'">＋新增顏色</button>' : '';
+    var editor = (EDIT && editorState && editorState.pid === p.id) ? editFormHtml(p) : '';
+
     return '<div class="card">'+
       '<div class="title">'+esc(p.name)+'</div>'+
       '<div class="metaRow">'+
@@ -672,7 +743,7 @@ window.SHOPEE_DATA = {"generatedAt":"2026-07-06","products":[{"id":"57307013478"
         skuTag +
         '<span class="tag">共 '+Object.keys(p.colors).length+' 色</span>'+
       '</div>'+
-      '<div class="colorList">'+rows+'</div>'+ noMatch + moreBtn +
+      '<div class="colorList">'+rows+'</div>'+ noMatch + moreBtn + addBtn + editor +
     '</div>';
   }
 
@@ -762,11 +833,90 @@ window.SHOPEE_DATA = {"generatedAt":"2026-07-06","products":[{"id":"57307013478"
     }
     if(t.hasAttribute('data-more')){ expandedSet[t.getAttribute('data-more')] = true; render(); return; }
     if(t.hasAttribute('data-less')){ delete expandedSet[t.getAttribute('data-less')]; render(); return; }
+
+    /* ---- 編輯模式事件 ---- */
+    if(t.hasAttribute('data-addcolor')){
+      editorState = {pid: t.getAttribute('data-addcolor'), color: null};
+      render(); return;
+    }
+    if(t.hasAttribute('data-editcolor')){
+      var pc = t.getAttribute('data-editcolor').split('|');
+      editorState = {pid: pc[0], color: pc.slice(1).join('|')};
+      render(); return;
+    }
+    if(t.hasAttribute('data-delcolor')){
+      var pc2 = t.getAttribute('data-delcolor').split('|');
+      var pid = pc2[0], color = pc2.slice(1).join('|');
+      var p2 = DATA.products.filter(function(x){ return x.id===pid; })[0];
+      if(p2 && window.confirm('確定刪除「'+color+'」這個顏色?(含其所有尺寸)')){
+        delete p2.colors[color];
+        markDirty();
+        refreshAll();
+      }
+      return;
+    }
+    if(t.id === 'efCancel'){ editorState = null; render(); return; }
+    if(t.id === 'efSave'){
+      var p3 = DATA.products.filter(function(x){ return x.id===editorState.pid; })[0];
+      if(!p3) return;
+      var newName = sanitize($('efName').value);
+      var sizesTxt = sanitize($('efSizes').value);
+      var priceVal = parseFloat($('efPrice').value) || 0;
+      if(!newName){ toast('請輸入顏色名稱'); return; }
+      var sizeList = sizesTxt.split(/[,、，\s]+/).filter(Boolean);
+      if(!sizeList.length) sizeList = [''];   // 無尺寸 → 單一規格
+      var oldName = editorState.color;
+      if(newName !== oldName && p3.colors[newName]){
+        toast('「'+newName+'」已存在,請改用其他名稱或先刪除'); return;
+      }
+      var priceChanged = String(priceVal) !== editorState.prefPrice;
+      var oldSizes = {};
+      if(oldName && p3.colors[oldName]){
+        p3.colors[oldName].forEach(function(v){ oldSizes[v[0]] = v[1]; });
+      }
+      var arr = sizeList.map(function(s){
+        var keep = (!priceChanged && oldSizes.hasOwnProperty(s)) ? oldSizes[s] : priceVal;
+        return [s, keep];
+      });
+      if(oldName) delete p3.colors[oldName];
+      p3.colors[newName] = arr;
+      editorState = null;
+      markDirty();
+      refreshAll();
+      toast('已更新「'+newName+'」,記得下載新檔儲存');
+      return;
+    }
   });
 
   $('chartClose').addEventListener('click', function(){ $('chartModal').classList.remove('show'); });
   $('chartModal').addEventListener('click', function(e){
     if(e.target === this) this.classList.remove('show');
+  });
+
+  /* ---------- 編輯模式開關與儲存 ---------- */
+  function markDirty(){
+    $('editNotice').style.display = 'flex';
+  }
+  function downloadSelf(){
+    if(!DATA){ toast('目前沒有資料可以匯出'); return; }
+    var html = buildSelfHtml(DATA);
+    var blob = new Blob([html], {type:'text/html;charset=utf-8'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = '蝦皮商品顏色查詢.html';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 3000);
+    toast('已下載新的網頁檔,請用它取代舊檔');
+  }
+  $('editMode').addEventListener('change', function(){
+    EDIT = this.checked;
+    if(!EDIT) editorState = null;
+    render();
+  });
+  $('editSaveBtn').addEventListener('click', function(){
+    var notice = $('editNotice');
+    notice.style.display = 'none';   // 序列化前先隱藏,避免存進檔案
+    downloadSelf();
   });
 
   /* ---------- 分頁切換 ---------- */
@@ -1003,15 +1153,7 @@ window.SHOPEE_DATA = {"generatedAt":"2026-07-06","products":[{"id":"57307013478"
   bindDrop($('noData'));
   $('updResult').addEventListener('click', function(e){
     if(e.target.id !== 'dlBtn') return;
-    if(!DATA){ toast('目前沒有資料可以匯出'); return; }
-    var html = buildSelfHtml(DATA);
-    var blob = new Blob([html], {type:'text/html;charset=utf-8'});
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = '蝦皮商品顏色查詢.html';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 3000);
-    toast('已下載新的網頁檔,請用它取代舊檔');
+    downloadSelf();
   });
   $('fileInput').addEventListener('change', function(){
     handleUpload(this.files); this.value='';
