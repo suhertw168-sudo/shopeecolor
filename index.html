@@ -626,9 +626,8 @@ window.SHOPEE_DATA = {"generatedAt":"2026-08-25","products":[{"id":"19482327559"
         counts[c] = (counts[c]||0)+1;
       });
     });
-    var opts = Object.keys(counts).sort(function(a,b){
-      return counts[b]-counts[a] || a.localeCompare(b,'zh-Hant');
-    }).map(function(c){ return {v:c, t:c+'('+counts[c]+')'}; });
+    var opts = Object.keys(counts).sort(colorSort)
+      .map(function(c){ return {v:c, t:c+'('+counts[c]+')'}; });
     fillSelect($('colorSel'), opts, true, '全部顏色');
   }
 
@@ -670,6 +669,18 @@ window.SHOPEE_DATA = {"generatedAt":"2026-08-25","products":[{"id":"19482327559"
     return false;
   }
 
+  /* 顏色排序鍵:取名稱結尾的數字(忽略括號註記與數字後的英文字母,如 32C→32),無數字者排最後 */
+  function colorNum(c){
+    var base = c.replace(/\s*[\(（].*[\)）]\s*$/,'');
+    var m = base.match(/(\d+)\s*[A-Za-z]*\s*$/);
+    return m ? parseInt(m[1], 10) : Infinity;
+  }
+  function colorSort(a, b){
+    var na = colorNum(a), nb = colorNum(b);
+    if(na !== nb) return na - nb;
+    return a.localeCompare(b, 'zh-Hant');
+  }
+
   var EDIT = false;
   var editorState = null;   // {pid, color(null=新增), prefPrice}
 
@@ -703,7 +714,7 @@ window.SHOPEE_DATA = {"generatedAt":"2026-08-25","products":[{"id":"19482327559"
     names.sort(function(a,b){
       var ha = colorHitByQuery(a)?1:0, hb = colorHitByQuery(b)?1:0;
       if(ha!==hb) return hb-ha;
-      return a.localeCompare(b,'zh-Hant');
+      return colorSort(a, b);
     });
 
     var expanded = !!expandedSet[p.id];
