@@ -9,9 +9,10 @@ window.SHOPEE_DATA = {"generatedAt":"2026-08-25","products":[{"id":"19482327559"
 </script>
 <style>
   :root{
-    --paper:#f6f5f2; --card:#ffffff; --ink:#23262b; --sub:#6b7078;
-    --line:#e3e1dc; --accent:#ee4d2d; --accent-soft:#fdeae5;
+    --paper:#f7f5f0; --card:#ffffff; --ink:#23262b; --sub:#6b7078;
+    --line:#e4e0d7; --accent:#a8842f; --accent-soft:#f8f0dc;
     --ok:#1a7f4b; --dim:#b0b3b8; --blue:#2b5aa0; --blue-soft:#eef3fb;
+    --field:#ffffff;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   body{
@@ -20,10 +21,29 @@ window.SHOPEE_DATA = {"generatedAt":"2026-08-25","products":[{"id":"19482327559"
   }
   .wrap{max-width:860px; margin:0 auto; padding:0 12px 80px;}
 
-  header{padding:18px 4px 10px; display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;}
-  header h1{font-size:20px; font-weight:700;}
+  header{
+    margin:12px 0 14px; padding:14px 18px; border-radius:16px;
+    background:radial-gradient(130% 180% at 10% 0%, #24262b 0%, #191b1f 58%, #121316 100%);
+    border:1px solid var(--line);
+    display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+    box-shadow:0 6px 20px rgba(14,15,17,.2);
+  }
+  header .mark{height:104px; width:auto; display:block; flex:none; border-radius:10px;}
+  .brandText{display:flex; flex-direction:column; gap:4px; min-width:0;}
+  .brandText .co{font-size:12.5px; font-weight:700; letter-spacing:.34em; color:#e0bd63;}
+  header h1{font-size:22px; font-weight:700; color:#faf9f7;}
   header h1 .dot{color:var(--accent);}
-  #dataDate{font-size:12.5px; color:var(--sub);}
+  header .hair{height:1px; width:56px; background:linear-gradient(90deg,var(--accent),transparent); margin-top:2px;}
+  #dataDate{
+    font-size:12.5px; color:#9a9ea6; margin-left:auto;
+    text-align:right; padding-left:12px;
+  }
+  @media(max-width:560px){
+    header{gap:12px; padding:12px 14px;}
+    header .mark{height:78px;}
+    header h1{font-size:18px;}
+    #dataDate{margin-left:0; width:100%; text-align:left; padding-left:0;}
+  }
 
   /* 分頁 */
   #tabBar{display:flex; gap:8px; margin-bottom:12px;}
@@ -41,7 +61,7 @@ window.SHOPEE_DATA = {"generatedAt":"2026-08-25","products":[{"id":"19482327559"
   .calcField label{display:block; font-size:12px; color:var(--sub); font-weight:600; margin-bottom:3px;}
   .calcField input[type=text], .calcField input[type=number]{
     width:100%; padding:9px 10px; font-size:15px; border:1.5px solid var(--line);
-    border-radius:10px; outline:none; background:#fff;
+    border-radius:10px; outline:none; background:var(--field); color:var(--ink);
   }
   .calcField input:focus{border-color:var(--accent);}
   .feeRow{display:flex; align-items:center; gap:6px; font-size:13.5px; margin-top:6px; flex-wrap:wrap;}
@@ -66,44 +86,44 @@ window.SHOPEE_DATA = {"generatedAt":"2026-08-25","products":[{"id":"19482327559"
   .couponRow input[type=checkbox]{accent-color:var(--accent); width:16px; height:16px;}
   #couponHint{color:var(--blue); font-weight:600;}
   #tierBtn{
-    border:1px solid var(--line); background:#fff; border-radius:8px;
+    border:1px solid var(--line); background:var(--field); border-radius:8px;
     padding:4px 10px; font-size:13px; cursor:pointer; color:var(--sub);
   }
   #tierTable{
-    display:none; margin-top:8px; padding:10px 12px; background:#fafaf8;
+    display:none; margin-top:8px; padding:10px 12px; background:#faf8f3;
     border:1px solid var(--line); border-radius:10px;
     column-count:3; column-gap:18px; font-size:13px; line-height:1.9;
   }
   @media(max-width:560px){ #tierTable{column-count:2;} }
   #tierTable .tRow{break-inside:avoid; white-space:nowrap;}
   #tierTable .tRow b{color:var(--accent);}
-  input:disabled{background:#f1f0ec !important; color:var(--sub);}
+  input:disabled{background:#f1efe9 !important; color:var(--sub);}
 
   /* 篩選面板 */
   #panel{
     display:none; background:var(--card); border:1px solid var(--line);
     border-radius:14px; padding:14px; position:sticky; top:8px; z-index:20;
-    box-shadow:0 2px 10px rgba(0,0,0,.04);
+    box-shadow:0 2px 10px rgba(0,0,0,.05);
   }
   .selGrid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px;}
   @media(max-width:560px){ .selGrid{grid-template-columns:1fr;} }
   .selBox label{display:block; font-size:12px; color:var(--sub); margin-bottom:3px; font-weight:600;}
   .selBox select{
     width:100%; padding:10px 8px; font-size:15px; border:1.5px solid var(--line);
-    border-radius:10px; background:#fff; outline:none; color:var(--ink);
+    border-radius:10px; background:var(--field); outline:none; color:var(--ink);
   }
   .selBox select:focus{border-color:var(--accent);}
   .selBox select.picked{border-color:var(--accent); background:var(--accent-soft); font-weight:600;}
   .subRow{display:flex; gap:10px; margin-top:10px; align-items:center; flex-wrap:wrap;}
   #q{
     flex:1; min-width:150px; border:1.5px solid var(--line); border-radius:10px;
-    padding:8px 12px; font-size:14px; outline:none;
+    padding:8px 12px; font-size:14px; outline:none; background:var(--field); color:var(--ink);
   }
   #q:focus{border-color:var(--accent);}
   .subRow label{display:flex; align-items:center; gap:5px; font-size:13px; color:var(--sub); cursor:pointer; white-space:nowrap;}
   .subRow input[type=checkbox]{accent-color:var(--accent); width:16px; height:16px;}
   #resetBtn{
-    border:1px solid var(--line); background:#fff; border-radius:10px;
+    border:1px solid var(--line); background:var(--field); border-radius:10px;
     padding:7px 12px; font-size:13px; cursor:pointer; color:var(--sub); white-space:nowrap;
   }
   #resultCount{font-size:13px; color:var(--sub); margin-left:auto;}
@@ -113,17 +133,17 @@ window.SHOPEE_DATA = {"generatedAt":"2026-08-25","products":[{"id":"19482327559"
   .card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 14px 12px;}
   .card .title{font-size:14.5px; font-weight:600; line-height:1.45; word-break:break-all;}
   .metaRow{display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; align-items:center;}
-  .tag{font-size:12px; background:#f1f0ec; border-radius:6px; padding:2px 8px; color:var(--sub);}
+  .tag{font-size:12px; background:#f1efe9; border-radius:6px; padding:2px 8px; color:var(--sub);}
   .tag.sku{background:var(--blue-soft); color:var(--blue); font-weight:600; cursor:pointer;}
   .copyBtn{
     border:none; background:var(--accent); color:#fff; border-radius:8px;
-    padding:6px 14px; font-size:13px; font-weight:600; cursor:pointer;
+    padding:6px 14px; font-size:13px; font-weight:700; cursor:pointer;
   }
   .copyBtn.copied{background:var(--ok);}
   .colorList{margin-top:10px; display:flex; flex-direction:column; gap:6px;}
   .colorRow{
     display:flex; align-items:flex-start; gap:8px; font-size:13px;
-    padding:6px 8px; border-radius:8px; background:#fafaf8;
+    padding:6px 8px; border-radius:8px; background:#faf8f3;
   }
   .colorRow.hit{background:var(--accent-soft);}
   .sw{width:15px; height:15px; border-radius:50%; border:1px solid rgba(0,0,0,.18); flex:none; margin-top:2px;}
@@ -143,17 +163,17 @@ window.SHOPEE_DATA = {"generatedAt":"2026-08-25","products":[{"id":"19482327559"
   }
   #chartModal.show{display:block;}
   .chartBox{
-    max-width:760px; margin:0 auto; background:#fff; border-radius:14px;
+    max-width:760px; margin:0 auto; background:var(--card); border-radius:14px;
     overflow:hidden;
   }
   .chartHead{
     display:flex; align-items:center; justify-content:space-between;
     padding:10px 14px; border-bottom:1px solid var(--line);
-    position:sticky; top:0; background:#fff;
+    position:sticky; top:0; background:var(--card); color:var(--ink);
   }
   .chartHead b{font-size:15px;}
   .chartHead button{
-    border:none; background:#f1f0ec; border-radius:8px; padding:6px 14px;
+    border:none; background:#f1efe9; color:var(--ink); border-radius:8px; padding:6px 14px;
     font-size:14px; cursor:pointer;
   }
   .chartBox img{display:block; width:100%; height:auto;}
@@ -167,7 +187,7 @@ window.SHOPEE_DATA = {"generatedAt":"2026-08-25","products":[{"id":"19482327559"
   /* 編輯模式 */
   .rowBtns{display:flex; gap:4px; flex:none;}
   .rowBtns button{
-    border:1px solid var(--line); background:#fff; border-radius:6px;
+    border:1px solid var(--line); background:var(--field); border-radius:6px;
     padding:1px 7px; font-size:12px; cursor:pointer; color:var(--sub);
   }
   .rowBtns button.del{color:#c0392b; border-color:#e8c4bf;}
@@ -178,7 +198,7 @@ window.SHOPEE_DATA = {"generatedAt":"2026-08-25","products":[{"id":"19482327559"
   .editForm .efRow{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
   .editForm label{font-weight:600; flex:none; width:44px;}
   .editForm input{
-    flex:1; min-width:120px; padding:7px 9px; font-size:14px;
+    flex:1; min-width:120px; padding:7px 9px; font-size:14px; background:var(--field); color:var(--ink);
     border:1.5px solid var(--line); border-radius:8px; outline:none;
   }
   .editForm .hintTxt{font-size:12px; color:var(--sub);}
@@ -187,7 +207,7 @@ window.SHOPEE_DATA = {"generatedAt":"2026-08-25","products":[{"id":"19482327559"
     border:none; border-radius:8px; padding:7px 16px; font-size:13.5px; font-weight:600; cursor:pointer;
   }
   #efSave{background:var(--accent); color:#fff;}
-  #efCancel{background:#fff; border:1px solid var(--line) !important; color:var(--sub);}
+  #efCancel{background:var(--field); border:1px solid var(--line) !important; color:var(--sub);}
   #editNotice{
     display:none; position:fixed; left:50%; transform:translateX(-50%);
     bottom:16px; z-index:80; background:var(--ink); color:#fff;
@@ -244,7 +264,12 @@ window.SHOPEE_DATA = {"generatedAt":"2026-08-25","products":[{"id":"19482327559"
 <body>
 <div class="wrap">
   <header>
-    <h1>蝦皮商品顏色查詢<span class="dot">.</span></h1>
+    <img class="mark" src="logo-full.png" alt="平價衣工廠">
+    <div class="brandText">
+      <span class="co">平價衣工廠</span>
+      <h1>蝦皮商品顏色查詢<span class="dot">.</span></h1>
+      <div class="hair"></div>
+    </div>
     <span id="dataDate">資料更新日期:2026-08-25|商品 103 個</span>
   </header>
 
@@ -327,7 +352,7 @@ window.SHOPEE_DATA = {"generatedAt":"2026-08-25","products":[{"id":"19482327559"
       <div id="tierTable"><div class="tRow">滿$599 折<b>20</b></div><div class="tRow">滿$799 折<b>25</b></div><div class="tRow">滿$999 折<b>30</b></div><div class="tRow">滿$1,299 折<b>40</b></div><div class="tRow">滿$1,499 折<b>45</b></div><div class="tRow">滿$1,699 折<b>50</b></div><div class="tRow">滿$1,999 折<b>60</b></div><div class="tRow">滿$2,299 折<b>70</b></div><div class="tRow">滿$2,499 折<b>75</b></div><div class="tRow">滿$2,699 折<b>80</b></div><div class="tRow">滿$2,999 折<b>90</b></div><div class="tRow">滿$3,299 折<b>100</b></div><div class="tRow">滿$3,499 折<b>105</b></div><div class="tRow">滿$3,699 折<b>110</b></div><div class="tRow">滿$3,999 折<b>120</b></div><div class="tRow">滿$4,299 折<b>130</b></div><div class="tRow">滿$4,499 折<b>135</b></div><div class="tRow">滿$4,699 折<b>140</b></div><div class="tRow">滿$4,999 折<b>150</b></div><div class="tRow">滿$5,299 折<b>160</b></div><div class="tRow">滿$5,499 折<b>165</b></div><div class="tRow">滿$5,699 折<b>170</b></div><div class="tRow">滿$5,999 折<b>200</b></div><div class="tRow">滿$6,999 折<b>210</b></div><div class="tRow">滿$7,999 折<b>240</b></div><div class="tRow">滿$8,999 折<b>270</b></div><div class="tRow">滿$9,999 折<b>300</b></div><div class="tRow">滿$12,999 折<b>390</b></div><div class="tRow">滿$13,999 折<b>420</b></div><div class="tRow">滿$14,999 折<b>450</b></div><div class="tRow">滿$15,999 折<b>480</b></div></div>
       <div class="couponRow">
         <span style="font-weight:600;">促銷組合:</span>
-        <select id="cPromoPlan" style="padding:5px 8px; font-size:13.5px; border:1.5px solid var(--line); border-radius:8px; background:#fff;">
+        <select id="cPromoPlan" style="padding:5px 8px; font-size:13.5px; border:1.5px solid var(--line); border-radius:8px; background:var(--field); color:var(--ink);">
           <option value="summer" selected="">夏季組合包(3件9.9折/4件9.7折/5件9.6折)</option>
           <option value="winter">冬季組合包(2件9.9折/3件9.7折/4件9.6折)</option>
           <option value="manual">不套用/手動輸入</option>
@@ -351,7 +376,7 @@ window.SHOPEE_DATA = {"generatedAt":"2026-08-25","products":[{"id":"19482327559"
 
     <div class="calcCard">
       <h2>客服說詞(傳給客人)</h2>
-      <div id="speechText" style="font-size:14.5px; line-height:1.9; background:#fafaf8; border:1px solid var(--line); border-radius:10px; padding:12px 14px; white-space:pre-wrap;">您好,大量優惠 50 件方案將提供您 210 元優惠券。
+      <div id="speechText" style="font-size:14.5px; line-height:1.9; background:#faf8f3; border:1px solid var(--line); border-radius:10px; padding:12px 14px; white-space:pre-wrap;">您好,大量優惠 50 件方案將提供您 210 元優惠券。
 另外,商品加入購物車即可享有 50 件多件優惠,約可再折抵 300 元。
 合計總優惠約為 510 元。</div>
       <button class="copyBtn" id="copySpeech" style="margin-top:12px;">複製說詞</button>
