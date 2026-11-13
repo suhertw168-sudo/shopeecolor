@@ -597,14 +597,22 @@ window.SHOPEE_DATA = {"generatedAt":"2026-10-30","products":[{"id":"21566103647"
   }
   function swatchOf(name, sku){ return swatchInfo(name, sku).bg; }
 
-  var SIZE_ORDER = ['XS','S','M','L','XL','2XL','XXL','3XL','XXXL','4XL','5XL','6XL','7XL','8XL'];
+  /* 尺寸排序:童裝(J碼/身高) → 成人(XS→7XL),完全依此清單由小到大 */
+  var SIZE_ORDER = [
+    'JXS','JS','JM','JL','JXL',                 // 童裝英文碼
+    '#6(120CM)','#8(130CM)','#10(140CM)',       // 童裝身高碼(括號型)
+    'JS/120','JM/130','JL/140','JXL/150',       // 童裝身高碼(斜線型)
+    'XS','S','M','L','XL','2XL','XXL','3XL','XXXL','4XL','5XL','6XL','7XL','8XL'  // 成人
+  ];
   function sizeRank(sz){
     var u = String(sz).toUpperCase().replace(/\s/g,'');
     var idx = SIZE_ORDER.indexOf(u);
     if(idx !== -1) return idx;
+    var cm = u.match(/(\d{3})CM/);     // 其他寫法的身高碼,依公分插入童裝區
+    if(cm) return 5 + parseInt(cm[1],10)/1000;
     var n = parseFloat(u);
-    if(!isNaN(n)) return 100 + n;
-    return 999;
+    if(!isNaN(n)) return 100 + n;       // 純數字碼
+    return 999;                        // F 均碼等 → 最後
   }
   function isMiscSpec(name){
     return /聊聊|運費|勿下單|請勿|下單前|補差額|差價/.test(name);
